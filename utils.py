@@ -9,16 +9,22 @@ gwei = int(10**9)
 
 w3 = web3.Web3(web3.Web3.IPCProvider(request_kwargs={'timeout': 60}))
 
-# Import a contract using its address, retrieving the abi from etherscan
 def import_contract(address):
+    """Import a contract using its address, retrieving the abi from etherscan
+
+    Args:
+        address (string): The address of the contract
+
+    Returns:
+        Contract: The contract object
+    """
     abi = requests.get('https://api.etherscan.io/api?module=contract&action=getabi&address='+address).json()['result']
     return w3.eth.contract(address=address, abi=abi)
 
 
-# Some useful decorators ---
+
 def synced(func):
-    """
-    Wrapper for functions requiring a connected and synced web3 instance
+    """Wrapper for functions requiring a connected and synced web3 instance
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -29,8 +35,10 @@ def synced(func):
     return wrapper
 
 
-# Calls a function on every new block
 def every_block(func):
+    """Wrapper for invoking a function on every new block
+
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         old_block = 0
@@ -44,6 +52,9 @@ def every_block(func):
 
 
 def restart_on_failure(func):
+    """Wrapper for restarting a function if it encounters an unhandled exception
+
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         while True:
