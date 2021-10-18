@@ -1,11 +1,19 @@
 import web3
 import utils
+import secrets
 
-w3 = web3.Web3(web3.Web3.IPCProvider(request_kwargs={'timeout': 60}))
-main_strategy_address = ""
+alchemy_kovan_endpoint = f"https://eth-kovan.alchemyapi.io/v2/{secrets.alchemy_kovan_api_key}"
+
+w3 = web3.Web3(web3.Web3.HTTPProvider(alchemy_kovan_endpoint, request_kwargs={'timeout': 60}))
+
+main_strategy_address = "0xe80EfEe1Ab443D9D63ee15e43ef928ef10a2C8da"
 
 # requires strategy manager to be verified on etherscan. Otherwise just do strategyManager = w3.eth.contract(address, abi)
-strategyManager = utils.import_contract(main_strategy_address)
+# strategyManager = utils.import_contract(main_strategy_address)
+with open("abi/pool.json") as f:
+    pool_abi = f.read()
+
+strategyManager = w3.eth.contract(address=main_strategy_address, abi=pool_abi)
 
  
 def getBallastPoolBalance():
@@ -14,7 +22,7 @@ def getBallastPoolBalance():
     Returns:
     int: The total pool balance
     """
-    return strategyManager.functions.investedUnderlyingBalance()
+    return strategyManager.functions.underlyingBalanceInclStrategy().call()
 
 
 def getBallastPoolYield():
@@ -23,7 +31,7 @@ def getBallastPoolYield():
     Returns:
         int: The aggregate underlying yield of the current strategy
     """
-    return strategyManager.functions.getAPR()
+    return strategyManager.functions.getAPR().call()
 
 
 def rebalance(allocation, estimate=False):
@@ -54,7 +62,7 @@ def getPlatformYields():
     DEV: Does Ballast contract have endpoint for this or do we need to import Aave and Compound contracts themselves? 
     """
     # TO DO
-    return {"compound": 0, "aave": 0}
+    return {"compound": 1, "aave": 2}
 
 # TO DO : This probably needs to be EIP-1559-ified
 def getGasPrice():

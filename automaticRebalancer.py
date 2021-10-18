@@ -1,7 +1,8 @@
 import utils
 import web3Feeds
+import models
 
-# 
+
 def checkCost(bestAllocation):
     """Get the gas cost (in USD equivalent) for executing a given allocation
 
@@ -26,8 +27,8 @@ def checkYieldDelta(potentialYield):
     Returns:
         int: The expected gain (in USD per unit time)
     """
-    poolBalance = web3Feeds.getCurrentPoolBalance()
-    poolYield = web3Feeds.getCurrentPoolYield()
+    poolBalance = web3Feeds.getBallastPoolBalance()
+    poolYield = web3Feeds.getBallastPoolYield()
     return poolBalance * (potentialYield - poolYield)
 
 
@@ -43,7 +44,6 @@ def getBestAllocation():
     return models.getBestAllocation()
 
 
-# Execute the strategy
 def execute(allocation):
     """Execute a given allocation
 
@@ -63,13 +63,14 @@ def checkForRebalance(horizon):
         horizon (int): The time horizon over which to check for profitable allocations
     """
     bestAllocation, bestYield = getBestAllocation()
+    print(bestAllocation, bestYield)
     
     # Profit over given time horizon must be greater than cost to execute allocation
     if (horizon * checkYieldDelta(bestYield)) - checkCost(bestAllocation) > 0:
         web3Feeds.execute(bestAllocation)
         
 
-@utils.restart_on_failure
+#@utils.restart_on_failure
 @utils.synced
 def main():
     """Main function. Require synced web3 connection. Restart on unhandled errors

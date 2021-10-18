@@ -2,12 +2,16 @@ import requests
 import web3
 import time
 import functools
+import secrets
+
 
 # Constants
 ether = int(10**18)
 gwei = int(10**9)
 
-w3 = web3.Web3(web3.Web3.IPCProvider(request_kwargs={'timeout': 60}))
+alchemy_kovan_endpoint = f"https://eth-kovan.alchemyapi.io/v2/{secrets.alchemy_kovan_api_key}"
+
+w3 = web3.Web3(web3.Web3.HTTPProvider(alchemy_kovan_endpoint, request_kwargs={'timeout': 60}))
 
 def import_contract(address):
     """Import a contract using its address, retrieving the abi from etherscan
